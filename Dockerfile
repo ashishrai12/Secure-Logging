@@ -4,22 +4,26 @@ FROM golang:1.21-alpine AS builder
 WORKDIR /app
 
 # Install dependencies
-COPY go.mod ./
+COPY go.mod go.sum ./
 RUN go mod download
 
 # Copy source
-COPY src/*.go ./src/
+COPY src/ ./src/
 
-# Build
-RUN CGO_ENABLED=0 GOOS=linux go build -o /secure-logging ./src/*.go
+# Build server
+RUN CGO_ENABLED=0 GOOS=linux go build -o /secure-logging-server ./src/cmd/server/main.go
+
+# Build client (optional but good to have)
+RUN CGO_ENABLED=0 GOOS=linux go build -o /secure-logging-client ./src/cmd/client/main.go
 
 # Run stage
 FROM alpine:latest
 
 WORKDIR /
 
-COPY --from=builder /secure-logging /secure-logging
+COPY --from=builder /secure-logging-server /secure-logging-server
+COPY --from=builder /secure-logging-client /secure-logging-client
 
 EXPOSE 5000
 
-CMD ["/secure-logging"]
+CMD ["/secure-logging-server"]

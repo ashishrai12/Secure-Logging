@@ -8,6 +8,8 @@ import (
 	"log"
 	"net/http"
 	"os"
+
+	"secure-logging/src/pkg"
 )
 
 func main() {
@@ -17,7 +19,7 @@ func main() {
 	}
 
 	fmt.Println("Initializing Client Identity...")
-	id, err := NewIdentity()
+	id, err := pkg.NewIdentity()
 	if err != nil {
 		log.Fatalf("Failed to create identity: %v", err)
 	}

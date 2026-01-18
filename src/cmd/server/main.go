@@ -9,11 +9,13 @@ import (
 	"os"
 	"sync"
 
+	"secure-logging/src/pkg"
+
 	"github.com/gin-gonic/gin"
 )
 
 type Node struct {
-	Blockchain *Blockchain
+	Blockchain *pkg.Blockchain
 	Nodes      map[string]bool
 	Mu         sync.Mutex
 	Port       string
@@ -21,7 +23,7 @@ type Node struct {
 
 func NewNode(port string) *Node {
 	return &Node{
-		Blockchain: NewBlockchain(4),
+		Blockchain: pkg.NewBlockchain(4),
 		Nodes:      make(map[string]bool),
 		Port:       port,
 	}
@@ -40,7 +42,7 @@ func (n *Node) AddLog(c *gin.Context) {
 	}
 
 	// Verify Signature
-	if err := VerifyEvent(input.PublicKey, input.Event, input.Signature); err != nil {
+	if err := pkg.VerifyEvent(input.PublicKey, input.Event, input.Signature); err != nil {
 		c.JSON(http.StatusUnauthorized, gin.H{"error": "Invalid signature"})
 		return
 	}
@@ -49,7 +51,7 @@ func (n *Node) AddLog(c *gin.Context) {
 	defer n.Mu.Unlock()
 
 	lastBlock := n.Blockchain.GetLastBlock()
-	data := LogData{
+	data := pkg.LogData{
 		Event:     input.Event,
 		PublicKey: input.PublicKey,
 		Signature: input.Signature,
@@ -57,7 +59,7 @@ func (n *Node) AddLog(c *gin.Context) {
 
 	proof, ts := n.Blockchain.ProofOfWork(lastBlock.Index+1, data, lastBlock.Hash)
 
-	newBlock := Block{
+	newBlock := pkg.Block{
 		Index:        lastBlock.Index + 1,
 		Timestamp:    ts,
 		Data:         data,
@@ -106,7 +108,7 @@ func (n *Node) RegisterNodes(c *gin.Context) {
 }
 
 func (n *Node) ReceiveBlock(c *gin.Context) {
-	var block Block
+	var block pkg.Block
 	if err := c.ShouldBindJSON(&block); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid block data"})
 		return
@@ -122,7 +124,7 @@ func (n *Node) ReceiveBlock(c *gin.Context) {
 	}
 }
 
-func (n *Node) BroadcastBlock(block Block) {
+func (n *Node) BroadcastBlock(block pkg.Block) {
 	n.Mu.Lock()
 	nodes := []string{}
 	for node := range n.Nodes {

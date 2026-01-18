@@ -1,4 +1,4 @@
-package main
+package pkg
 
 import (
 	"crypto"
@@ -9,7 +9,6 @@ import (
 	"encoding/base64"
 	"encoding/pem"
 	"errors"
-	"fmt"
 )
 
 type Identity struct {
