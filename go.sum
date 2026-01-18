@@ -5,7 +5,7 @@ github.com/chenzhuoyu/base64x v0.0.0-20221115062448-fe3a3abad311/go.mod h1:1pcyS
 github.com/gabriel-vasile/mimetype v1.4.2 h1:w5qFW6JKvPeub87nyS8qOnEpsPSh6N7Ait8oYVb4MAs=
 github.com/gabriel-vasile/mimetype v1.4.2/go.mod h1:29cnB9iHdfdzasXv8zK8m/27jTq+tK33Yy9eUK2X8Gk=
 github.com/gin-contrib/sse v0.1.0 h1:Y/yl/+EVHbeGysGSc0qc6L737S8tD2qL7t8qYhYf9hE=
-github.com/gin-contrib/sse v0.1.0/go.mod h1:RH7AbSvp8RIeNDOas5uPPrS6p8CPrxL3f89816hvlO8=
+github.com/gin-contrib/sse v0.1.0/go.mod h1:RHrZQHXnP2xjPF+u1gW/2HnVO7nvIa9PG3Gm+fLHvGI=
 github.com/gin-gonic/gin v1.9.1 h1:4HOf0/QH8uNo8A3yFfA8T+A2QpY0fK6eXGAnS8idvKk=
 github.com/gin-gonic/gin v1.9.1/go.mod h1:hPr67JvMv6nUStBvKOfz/zI+S60XnToSntidRzW67tI=
 github.com/go-playground/locales v0.14.1 h1:Efbwa6MOfHlB4zV2InS00pS3366qTclq5FayGgyn0+M=
