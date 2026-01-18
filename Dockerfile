@@ -1,14 +1,25 @@
-FROM python:3.9-slim
+# Build stage
+FROM golang:1.21-alpine AS builder
 
 WORKDIR /app
 
-COPY requirements.txt .
-RUN pip install --no-cache-dir -r requirements.txt
+# Install dependencies
+COPY go.mod ./
+RUN go mod download
 
-COPY . .
+# Copy source
+COPY src/*.go ./src/
 
-ENV PYTHONPATH=/app
+# Build
+RUN CGO_ENABLED=0 GOOS=linux go build -o /secure-logging ./src/*.go
+
+# Run stage
+FROM alpine:latest
+
+WORKDIR /
+
+COPY --from=builder /secure-logging /secure-logging
 
 EXPOSE 5000
 
-CMD ["python", "src/node.py"]
+CMD ["/secure-logging"]

@@ -1,4 +1,4 @@
-name: Python CI
+name: Go CI
 
 on:
   push:
@@ -11,15 +11,17 @@ jobs:
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v3
-    - name: Set up Python 3.9
-      uses: actions/setup-python@v4
+
+    - name: Set up Go
+      uses: actions/setup-go@v4
       with:
-        python-version: 3.9
+        go-version: '1.21'
+
     - name: Install dependencies
-      run: |
-        python -m pip install --upgrade pip
-        pip install -r requirements.txt
+      run: go mod download
+
     - name: Run tests
-      run: |
-        export PYTHONPATH=$PYTHONPATH:.
-        pytest tests/
+      run: go test ./src/... -v
+
+    - name: Build
+      run: go build -v ./src/...

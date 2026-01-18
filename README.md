@@ -1,79 +1,94 @@
 # Secure-Logging: Decentralized and Secure Blockchain Solution
 
-A blockchain-based solution for tamper-proof logging events. This project ensures that log events are immutable once stored and can be verified using digital signatures.
+A high-performance **Go-based** blockchain solution for tamper-proof logging events. This project ensures that log events are immutable once stored and can be verified using RSA-PSS digital signatures.
+
+## System Architecture
+
+The following diagram illustrates the interaction between clients and the decentralized logging network.
+
+```mermaid
+graph TD
+    subgraph "Client Side"
+        C[Client Application]
+        K[RSA Key Pair Gen]
+        S[Event Signer]
+    end
+
+    subgraph "P2P Blockchain Network"
+        N1[Node 1: Port 5001]
+        N2[Node 2: Port 5002]
+        N3[Node N: Port 500X]
+        B1[(Local Ledger)]
+        B2[(Local Ledger)]
+        
+        N1 <--> N2
+        N2 <--> N3
+        N1 <--> N3
+        
+        N1 --- B1
+        N2 --- B2
+    end
+
+    subgraph "Logging Process"
+        P1[1. Sign Event]
+        P2[2. POST /logs]
+        P3[3. Verify Signature]
+        P4[4. Mine Block - PoW]
+        P5[5. Consensus/Broadcast]
+    end
+
+    C --> K
+    K --> S
+    S --> P1
+    P1 --> P2
+    P2 --> N1
+    N1 --> P3
+    P3 --> P4
+    P4 --> P5
+    P5 --> N2
+```
+
+### Architecture Components Explained
+
+1.  **Client Application**: Generates a unique RSA-2048 key pair. Each log entry is signed with the user's private key before being sent to the network.
+2.  **RSA-PSS Signing**: Unlike simple signing, PSS (Probabilistic Signature Scheme) adds a salt to each signature, making it cryptographically more robust for secure logging.
+3.  **Mining (Proof of Work)**: Each node competes to find a hash with a specific number of leading zeros (difficulty). This prevents spam and makes tampering with history computationally expensive.
+4.  **P2P Consensus**: When a node finds a valid block, it broadcasts it to its peers. Nodes always follow the longest valid chain, ensuring eventual consistency across the network.
+5.  **Immutability**: Since each block contains the `PreviousHash` of the parent block, changing a single log entry would require re-mining every subsequent block in the chain.
 
 ## Features
 
-- **Decentralized Ledger**: Uses a blockchain to store log events across multiple nodes.
-- **Tamper-proof**: Each block is linked via hashes and secured by Proof of Work (PoW).
-- **Secure Authentication**: Every log entry is signed using RSA digital signatures (Private/Public key pair).
-- **P2P Consensus**: Longest-chain consensus algorithm to resolve conflicts between nodes.
-- **REST API**: Simple interface to submit logs, view the chain, and manage nodes.
-- **CI/CD**: Integrated GitHub Actions for automated testing.
+-   **Go Engine**: Re-implemented in Go for superior performance and concurrency.
+-   **RSA-PSS Security**: Modern cryptographic standards for event verification.
+-   **RESTful API**: Multi-node support with automated block propagation.
+-   **Containerized**: Multi-stage Docker builds for minimal footprint.
 
 ## Getting Started
 
 ### Prerequisites
 
-- Python 3.9+
-- Docker & Docker Compose (optional for local network simulation)
+-   Docker & Docker Compose
 
-### Installation
+### Running the Network
 
-1. Clone the repository:
-   ```bash
-   git clone https://github.com/ashishrai12/Secure-Logging.git
-   cd Secure-Logging
-   ```
-
-2. Install dependencies:
-   ```bash
-   pip install -r requirements.txt
-   ```
-
-### Running Locally
-
-To start a single node:
-```bash
-python src/node.py
-```
-The node will be available at `http://localhost:5000`.
-
-### Running with Docker (Network of Nodes)
-
-To simulate a decentralized network:
+To start a decentralized network with two nodes:
 ```bash
 docker-compose up --build
 ```
-This starts two nodes:
-- Node 1: `http://localhost:5001`
-- Node 2: `http://localhost:5002`
+-   **Node 1**: `http://localhost:5001`
+-   **Node 2**: `http://localhost:5002`
 
-### Usage Example
+### API Interface
 
-You can use the provided client script to sign and submit a log:
-```bash
-# Make sure a node is running on 5001
-export PYTHONPATH=$PYTHONPATH:.
-python src/client.py
-```
+-   `POST /logs`: Submit a new log.
+    -   `{"event": "User logged in", "public_key": "PEM...", "signature": "BASE64..."}`
+-   `GET /chain`: View the current blockchain state.
+-   `POST /nodes/register`: Add neighbor nodes URLs.
+-   `POST /receive-block`: (Internal) Used for P2P block propagation.
 
-## API Documentation
+## Why Go?
 
-- `POST /logs`: Submit a new log event.
-  - Body: `{"event": "str", "public_key": "PEM_str", "signature": "Base64_str"}`
-- `GET /chain`: Retrieve the full blockchain.
-- `POST /nodes/register`: Register new nodes in the network.
-  - Body: `{"nodes": ["host1:port", "host2:port"]}`
-- `GET /nodes/resolve`: Trigger consensus algorithm to sync with the network.
-
-## Testing
-
-Run tests using pytest:
-```bash
-pytest tests/
-```
-
-## CI/CD Workflow
-
-This project includes a GitHub Actions workflow in `.github/workflows/ci.yml` that automatically runs tests on every push to the `main` branch.
+This project was migrated from Python to Go to take advantage of:
+-   **True Parallelism**: Go routines allow nodes to handle networking and mining simultaneously without GIL bottlenecks.
+-   **Strict Typing**: Ensures data integrity across the block structures.
+-   **Static Binaries**: Reduced Docker image size and faster startup times.
